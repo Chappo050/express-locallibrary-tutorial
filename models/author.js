@@ -1,6 +1,6 @@
 const { get } = require('http');
 const mongoose = require('mongoose');
-
+const { DateTime } = require("luxon");
 const Schema = mongoose.Schema;
 
 const AuthorSchema = new Schema (
@@ -36,9 +36,21 @@ AuthorSchema
 //Virtual for author's URL
 AuthorSchema
 .virtual('url')
-.get(()=>{
+.get(function(){
     return `/catalog/author/${this._id}`;
 })
 
+AuthorSchema
+.virtual('birthdate')
+.get(function() {
+  return this.date_of_birth ? DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : 'Never born';
+});
+
+
+AuthorSchema
+.virtual('deathdate')
+.get(function() {
+  return this.date_of_death ? DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED) : 'Still kicking';
+});
 //Export model
 module.exports = mongoose.model('Author', AuthorSchema);
