@@ -1,19 +1,22 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
 const catalogRouter = require("./routes/catalog"); //Import routes for "catalog" area of site
 
-var app = express();
+const compression = require('compression'); //Compression
+const helmet = require('helmet'); //Protection
+
+const app = express();
 
 // Set up mongoose connection to mongoDB
 const mongoose = require("mongoose");
-const mongoDB =
-  "mongodb+srv://Chappo:Cha21bcs@cluster0.ajhedsi.mongodb.net/local_library?retryWrites=true&w=majority";
+const dev_db_url =  "mongodb+srv://Chappo:Cha21bcs@cluster0.ajhedsi.mongodb.net/local_library?retryWrites=true&w=majority";
+const mongoDB = process.env.MONGODB_URI || dev_db_url;
 
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -24,10 +27,14 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
+//Stuff needed for all routes
+app.use(helmet());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression()); //Compress all routes
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
